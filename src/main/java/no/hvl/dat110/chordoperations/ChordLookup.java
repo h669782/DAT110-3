@@ -32,19 +32,18 @@ public class ChordLookup {
 	}
 	
 	public NodeInterface findSuccessor(BigInteger key) throws RemoteException {
-		// ask this node to find the successor of key
+		NodeInterface successor = node.getSuccessor();
+		BigInteger nodeID = node.getNodeID();
+		BigInteger succID = successor.getNodeID();
 		
-		// get the successor of the node
+		boolean inInterval = Util.checkInterval(key, nodeID.add(BigInteger.ONE), succID);
 		
-		// check that key is a member of the set {nodeid+1,...,succID} i.e. (nodeid+1 <= key <= succID) using the checkInterval
-		
-		// if logic returns true, then return the successor
-		
-		// if logic returns false; call findHighestPredecessor(key)
-		
-		// do highest_pred.findSuccessor(key) - This is a recursive call until logic returns true
-				
-		return null;					
+		if(inInterval) {
+			return successor;
+		} else {
+			NodeInterface highestPred = findHighestPredecessor(key);
+			return highestPred.findSuccessor(key);
+		}
 	}
 	
 	/**
@@ -54,16 +53,22 @@ public class ChordLookup {
 	 * @throws RemoteException
 	 */
 	private NodeInterface findHighestPredecessor(BigInteger ID) throws RemoteException {
+		List<NodeInterface> fingers = node.getFingerTable();
+		BigInteger nodeID = node.getNodeID();
 		
-		// collect the entries in the finger table for this node
-		
-		// starting from the last entry, iterate over the finger table
-		
-		// for each finger, obtain a stub from the registry
-		
-		// check that finger is a member of the set {nodeID+1,...,ID-1} i.e. (nodeID+1 <= finger <= key-1) using the ComputeLogic
-		
-		// if logic returns true, then return the finger (means finger is the closest to key)
+		for(int i = fingers.size() - 1; i >= 0; i--) {
+			NodeInterface f = fingers.get(i);
+			if(f != null) {
+				try {
+					BigInteger fID = f.getNodeID();
+					boolean inInterval = Util.checkInterval(fID, nodeID.add(BigInteger.ONE), ID.subtract(BigInteger.ONE));
+					if(inInterval) {
+						return f;
+					}
+				} catch(RemoteException e) {
+				}
+			}
+		}
 		
 		return (NodeInterface) node;			
 	}
