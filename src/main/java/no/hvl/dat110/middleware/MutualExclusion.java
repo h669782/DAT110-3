@@ -138,10 +138,10 @@ public class MutualExclusion {
 			 */
 			case 2: {
 				int senderClock = message.getClock();
-				int ownClock = clock.getClock();
+				int ownRequestClock = node.getMessage().getClock();
+				BigInteger ownRequestID = node.getMessage().getNodeID();
 
-				if (senderClock < ownClock 
-				  || (senderClock == ownClock && message.getNodeID().compareTo(node.getNodeID()) < 0)) {
+				if (senderClock < ownRequestClock || (senderClock == ownRequestClock && message.getNodeID().compareTo(ownRequestID) < 0)) {
 					
 					NodeInterface stub = Util.getProcessStub(procName, port);
 					if (stub != null) {
